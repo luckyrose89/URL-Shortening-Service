@@ -12,7 +12,8 @@
     "dotenv": "^6.0.0",
     "express": "^5.0.0-alpha.2",
     "mongodb": "^2.2.36",
-    "mongoose": "^4.13.14"
+    "mongoose": "^4.13.14",
+    "url-parse": "^1.4.3"
   },
   "engines": {
     "node": "4.4.5"
