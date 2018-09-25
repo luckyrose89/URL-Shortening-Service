@@ -1,8 +1,10 @@
 'use strict';
-
+require('dotenv').config();
 var express = require('express');
 var mongo = require('mongodb');
 var mongoose = require('mongoose');
+
+mongoose.Promise = global.Promise;
 
 var cors = require('cors');
 
@@ -13,6 +15,14 @@ var port = process.env.PORT || 3000;
 
 /** this project needs a db !! **/ 
 // mongoose.connect(process.env.MONGOLAB_URI);
+var mongoURL = process.env.MONGOLAB_URI;
+mongoose.connect(mongoURL,{
+  useMongoClient: true
+}).then((db) => {
+  console.log('connected to db:', db);
+}, (e) => {
+  console.log(e);
+});
 
 app.use(cors());
 
