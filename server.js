@@ -3,10 +3,10 @@ require('dotenv').config();
 var express = require('express');
 var mongo = require('mongodb');
 var mongoose = require('mongoose');
+var cors = require('cors');
+var bodyParser = require('body-parser');
 
 mongoose.Promise = global.Promise;
-
-var cors = require('cors');
 
 var app = express();
 
