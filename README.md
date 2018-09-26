@@ -14,7 +14,7 @@ POST [project_url]/api/shorturl/new - body (urlencoded) :  url=https://www.googl
 
 #### Usage:
 
-[https://fresh-braid.glitch.me/api/shorturl/17953]/api/shorturl/17953
+[https://fresh-braid.glitch.me/api/shorturl/17953]
 
 #### Will redirect to:
 
