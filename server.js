@@ -3,9 +3,11 @@ require('dotenv').config();
 var express = require('express');
 var mongo = require('mongodb');
 var mongoose = require('mongoose');
+
 var cors = require('cors');
 var bodyParser = require('body-parser');
 var dns = require('dns');
+var URL = require('url-parse');
 
 mongoose.Promise = global.Promise;
 
@@ -19,10 +21,6 @@ var port = process.env.PORT || 3000;
 var mongoURL = process.env.MONGOLAB_URI;
 mongoose.connect(mongoURL,{
   useMongoClient: true
-}).then((db) => {
-  console.log('connected to db:', db);
-}, (e) => {
-  console.log(e);
 });
 
 app.use(cors());
@@ -46,7 +44,21 @@ app.get("/api/hello", (req, res) => {
 // Response to post request
 app.post('/api/shorturl/new', (req, res) => {
   var url = req.body.url;
-  res.send(url);
+  var urlTester = /^((https?):\/\/)?([w|W]{3}\.)+[a-zA-Z0-9\-\.]{3,}\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})?$/;
+
+  if(url.match(urlTester)) {
+    var hostname = URL(url).hostname;
+    dns.lookup(hostname, (err, address, family) => {
+      if(err) {
+        res.json({"error":"invalid URL"});
+      } else {
+        res.json({url});
+      }
+    });
+  } else {
+    res.json({"error":"invalid URL"});
+  }
+
 });
 
 
