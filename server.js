@@ -45,7 +45,7 @@ app.get("/api/hello", (req, res) => {
 // Response to post request
 app.post('/api/shorturl/new', (req, res) => {
   var url = req.body.url;
-  var urlTester = /^((https?|ftp|smtp):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9-_#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/;
+  var urlTester = /^(ftp|http|https):\/\/[^ "]+$/;
   var hostname = URL(url).hostname;
   
 
