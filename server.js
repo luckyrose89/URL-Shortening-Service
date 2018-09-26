@@ -1,17 +1,18 @@
 'use strict';
 require('dotenv').config();
-var express = require('express');
-var mongo = require('mongodb');
-var mongoose = require('mongoose');
+const express = require('express');
+const mongo = require('mongodb');
+const mongoose = require('mongoose');
 
-var cors = require('cors');
-var bodyParser = require('body-parser');
-var dns = require('dns');
-var URL = require('url-parse');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+const dns = require('dns');
+const URL = require('url-parse');
+const shortUrl = require('./models/url-model');
 
 mongoose.Promise = global.Promise;
 
-var app = express();
+const app = express();
 
 // Basic Configuration 
 var port = process.env.PORT || 3000;
@@ -44,15 +45,38 @@ app.get("/api/hello", (req, res) => {
 // Response to post request
 app.post('/api/shorturl/new', (req, res) => {
   var url = req.body.url;
-  var urlTester = /^((https?):\/\/)?([w|W]{3}\.)+[a-zA-Z0-9\-\.]{3,}\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})?$/;
+  var urlTester = /^((https?|ftp|smtp):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9-_#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/;
+  var hostname = URL(url).hostname;
+  
 
   if(url.match(urlTester)) {
-    var hostname = URL(url).hostname;
-    dns.lookup(hostname, (err, address, family) => {
+    dns.lookup(hostname, (err) => {
       if(err) {
         res.json({"error":"invalid URL"});
       } else {
-        res.json({url});
+        shortUrl.findOne({'originalUrl': url}).then((item) => {
+          if(item) {
+            res.json({
+              "originalUrl": item.originalUrl,
+              "shortUrl": item.shortUrl
+            });
+          } else if(!item) {
+            var data = new shortUrl({
+              originalUrl: url,
+              shortUrl: Math.floor(Math.random()*100000).toString()
+            });
+            data.save().then((doc) => {
+              res.json({
+                "originalUrl": doc.originalUrl,
+                "shortUrl": doc.shortUrl
+              });
+            }, (e) => {
+              res.status(400).send(e);
+            });
+          }
+        }, (e) => {
+          res.status(400).send(e);
+        });
       }
     });
   } else {
@@ -60,6 +84,18 @@ app.post('/api/shorturl/new', (req, res) => {
   }
 
 });
+
+//  Response to GET request for shortUrls
+app.get('/api/shorturl/:url_id', (req, res) => {
+  var shorterUrl = req.params.url_id;
+
+  shortUrl.findOne({'shortUrl': shorterUrl}).then((item) => {
+    res.redirect(item.originalUrl);
+  }).catch((e) => {
+    res.status(400).send();
+  });
+});
+
 
 
 app.listen(port, () => {
